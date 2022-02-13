@@ -1,0 +1,16 @@
+{
+  "name": "fspbook",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "gulp": "gulp"
+  },
+  "author": "FSP",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.49.7"
+  }
+}

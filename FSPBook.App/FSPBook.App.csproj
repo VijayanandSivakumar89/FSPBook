@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FileContextCore" Version="3.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.17">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FSPBook.Data\FSPBook.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\css\" />
+  </ItemGroup>
+
+  <Target Name="NPMInstall" AfterTargets="PostBuildEvent">
+    <Exec Command="npm install" />
+  </Target>
+
+  <Target Name="Gulp" AfterTargets="NPMInstall">
+    <Exec Command="npm run gulp" />
+  </Target>
+
+</Project>

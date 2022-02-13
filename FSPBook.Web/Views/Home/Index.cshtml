@@ -1,0 +1,39 @@
+﻿@model FSPBook.Web.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="header">
+    <h2>FSP Book - One Place Stop for All Blog Posts</h2>
+</div>
+
+<div class="row">
+    <div class="leftcolumn">
+        @foreach (var post in Model.Posts)
+        {
+        <div class="card">
+            <h2> @Html.ActionLink(@post.Profile.FullName, "Profile", "Home", new { id = @post.ProfileId })</h2>
+            <h5>@post.DateTimePosted.DateTime</h5>
+            <p>@post.Content</p>
+        </div>
+                
+
+        }
+    </div>
+
+    <div class="rightcolumn">
+        @foreach (var article in Model.Articles)
+        {
+            <div class="card">
+                <h6>@article.Title</h6>
+                <div style="height:100px;"><img src="@article.Url" width="100"/></div>
+            </div>
+        }
+           
+
+   </div>
+</div>
+
+<div class="footer">
+    <h2>Footer</h2>
+</div>
