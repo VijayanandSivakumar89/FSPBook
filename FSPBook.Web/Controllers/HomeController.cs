@@ -25,6 +25,11 @@ namespace FSPBook.Web.Controllers
         private readonly IFSPBookRepository _repository;
         private readonly IConfiguration _configuration;
 
+        /// <summary>
+        /// Controller constructor injected with the repository and configuration objects instanciated in middleware
+        /// </summary>
+        /// <param name="configuration"></param>
+        /// <param name="bookRepository"></param>
         public HomeController(IConfiguration configuration, IFSPBookRepository bookRepository )
         {
                   
@@ -32,25 +37,29 @@ namespace FSPBook.Web.Controllers
             _repository = bookRepository;
         }
        
-
+        /// <summary>
+        /// Landing Page of the site to display the latest posts from authors along with Technical News
+        /// </summary>
+        /// <returns></returns>
         public async Task<ActionResult> Index()
         {
-            var articles = await GetTechnologyNewsAsync();
+            var articles = new List<Article>();
+            articles = await GetTechnologyNewsAsync(); //Call to get latest Tech news from News API
+            var fakeArticle = new List<Article>() { new Article() { Title = "FakeNews", Url = "https://ichef.bbci.co.uk/news/1024/branded_news/83B3/production/_115651733_breaking-large-promo-nc.png" } };
+            articles = (articles.Count > 0) ? articles.Take(5).ToList() : fakeArticle;
             var viewModel = new HomeViewModel()
             {
                 Posts = _repository.GetPosts(),
-                Articles = articles.Take(5).ToList()
+                Articles = articles
             };
             HttpContext.Session.SetObject("Articles", viewModel.Articles);
             return View(viewModel);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
+       /// <summary>
+       /// Screen to create new posts
+       /// </summary>
+       /// <returns></returns>
         [HttpGet]
         public IActionResult CreatePost()
         {
@@ -59,6 +68,11 @@ namespace FSPBook.Web.Controllers
             return View(viewModel);
         }
 
+        /// <summary>
+        /// Saves the new posts to DB
+        /// </summary>
+        /// <param name="viewModel"></param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult CreatePost(CreatePostViewModel viewModel)
         {
@@ -76,6 +90,11 @@ namespace FSPBook.Web.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Screen to view individual author profile and their posts
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Profile(int id)
         {
@@ -86,36 +105,57 @@ namespace FSPBook.Web.Controllers
             return View(viewModel);
         }
 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        public IActionResult Error()
+        {
+            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        /// <summary>
+        /// News API call to fetch latest Technology news
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<Article>> GetTechnologyNewsAsync()
         {
-            using (var httpClient = new HttpClient())
+            var newsArticles = new List<Article>();
+            try
             {
-                var httpRequest = new HttpRequestMessage(HttpMethod.Get, _configuration["NewsAPIURL"] + "top-headlines" + "?" + "country=us&category=technology");
 
-                httpClient.DefaultRequestHeaders.Add("x-api-key", _configuration["NewsAPIKey"]);
-
-                var httpResponse = await httpClient.SendAsync(httpRequest);
-
-                var json = await httpResponse.Content?.ReadAsStringAsync();
-                var newsArticles = new List<Article>();
-                if (!string.IsNullOrWhiteSpace(json))
+                using (var httpClient = new HttpClient())
                 {
-                    // convert the json to an obj
-                    dynamic apiResponse = JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
+                    var httpRequest = new HttpRequestMessage(HttpMethod.Get, _configuration["NewsAPIURL"] + "top-headlines" + "?" + "country=us&category=technology");
 
-                    foreach (var item in (IEnumerable<dynamic>)apiResponse.articles)
+                    httpClient.DefaultRequestHeaders.Add("x-api-key", _configuration["NewsAPIKey"]);
+
+                    var httpResponse = await httpClient.SendAsync(httpRequest);
+
+                    var json = await httpResponse.Content?.ReadAsStringAsync();
+
+                    if (!string.IsNullOrWhiteSpace(json))
                     {
+                        // convert the json to an obj
+                        dynamic apiResponse = JsonConvert.DeserializeObject<ExpandoObject>(json, new ExpandoObjectConverter());
+
+                        foreach (var item in (IEnumerable<dynamic>)apiResponse.articles)
+                        {
                             var article = new Article()
                             {
                                 Title = item.title,
                                 Url = item.urlToImage
                             };
                             newsArticles.Add(article);
-                    }                    
-                    
+                        }
+
+                    }
+                    return newsArticles;
                 }
+            }
+            catch (Exception e)
+            {
                 return newsArticles;
             }
+                
+            
         }
     }
 }

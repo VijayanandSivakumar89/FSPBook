@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace FSPBook.Data.Repository
 {
+    /// <summary>
+    /// Repository for Retrieving, Creating posts
+    /// </summary>
     public interface IFSPBookRepository
     {
         List<Profile> GetProfiles();
@@ -14,6 +17,7 @@ namespace FSPBook.Data.Repository
         List<Post> GetPosts();
 
         Post CreatePost(Post post);
+
         List<Post> GetProfilePostsById(int id);
     }
 }
